@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>撮影タイマー</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <input type="text" id="interval" placeholder="間隔(秒)">
+        <button id="camera" onclick="CameraStart()">カメラ起動</button>
+        <button id="start" onclick="Start()">スタート</button>
+        <video height="720px" width="1280px" id="videoPreview" autoplay></video>
+        <canvas height="720px" width="1280px" id="resultsBoard"></canvas>
+        <div id="download"></div>
+    </body>
+    <script>
+        function CameraStart(){
+            navigator.mediaDevices.getUserMedia({video:true, audio:false}).then(function(stream){
+                document.getElementById("videoPreview").srcObject = stream;
+            }).catch(function(error){
+                console.error("mediaDevice.getUserMedia() error:", error);
+                return;
+            })
+            var video = document.getElementById('videoPreview');
+            var canvas = document.getElementById('resultsBoard');
+            var ctx = canvas.getContext('2d');
+            var w = video.offsetWidth;
+            var h = video.offsetHeight;
+            ctx.drawImage(video, 0, 0, w, h);
+            canvas.toBlob(function(result){
+                var imageURL = URL.createObjectURL(result);
+                document.getElementById('download').innerHTML = "<a href='" + imageURL + "'' id='imageDl' download='image.png'>"
+            }, "image/png");
+        }
+
+        function updateCanvas(){
+                var video = document.getElementById('videoPreview');
+                var canvas = document.getElementById('resultsBoard');
+                var ctx = canvas.getContext('2d');
+                var w = video.offsetWidth;
+                var h = video.offsetHeight;
+                ctx.drawImage(video, 0, 0, w, h);
+                canvas.toBlob(function(result){
+                    var imageURL = URL.createObjectURL(result);
+                    document.getElementById('download').innerHTML = "<a href='" + imageURL + "'' id='imageDl' download='image.png'>"
+                }, "image/png");
+                document.getElementById('imageDl').click();
+        }
+
+        function Start(){
+            var interval = parseInt(document.getElementById('interval').value)
+            updateCanvas();
+            setInterval(updateCanvas, interval*1000);
+        }
+
+
+    </script>
+</html>
